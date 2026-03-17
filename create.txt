@@ -1,0 +1,388 @@
+DROP TABLE IF EXISTS Contracts CASCADE;
+DROP TABLE IF EXISTS Matches CASCADE;
+DROP TABLE IF EXISTS Players CASCADE;
+DROP TABLE IF EXISTS Positions CASCADE;
+DROP TABLE IF EXISTS Nationalities CASCADE;
+DROP TABLE IF EXISTS SponsorPayments CASCADE;
+DROP TABLE IF EXISTS Sponsors CASCADE;
+DROP TABLE IF EXISTS Results CASCADE;
+DROP TABLE IF EXISTS Competitions CASCADE;
+DROP TABLE IF EXISTS Opponents CASCADE;
+DROP TABLE IF EXISTS Administration CASCADE;
+DROP TABLE IF EXISTS CoachingStaff CASCADE;
+DROP TABLE IF EXISTS Trainers CASCADE;
+DROP TABLE IF EXISTS ApprovalOfCoachingStaff CASCADE;
+
+CREATE TABLE Players (
+    player_id SERIAL,
+    "name" TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    patronymic TEXT,
+    date_of_birth DATE NOT NULL,
+    passport_series INTEGER NOT NULL,
+    passport_number INTEGER NOT NULL,
+    division_number INTEGER NOT NULL,
+    date_of_issue DATE NOT NULL,
+    issued_by_whom TEXT NOT NULL,
+    team_number INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    weight INTEGER NOT NULL,
+    phone_number TEXT NOT NULL,
+    salary INTEGER NOT NULL,
+	nationality_id INT NOT NULL,
+	position_id INT NOT NULL
+);
+
+ALTER TABLE Players 
+ADD CONSTRAINT PK_Players 
+    PRIMARY KEY (player_id);
+
+ALTER TABLE Players 
+ADD CONSTRAINT U_Players_phone_number 
+    UNIQUE (phone_number);
+
+ALTER TABLE Players 
+ADD CONSTRAINT U_Players_team_number 
+    UNIQUE (team_number);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_team_number 
+    CHECK (team_number > -1);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_passport_number 
+    CHECK (passport_number > 0);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_passport_series 
+    CHECK (passport_series > 1850);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_division_number
+    CHECK (division_number > 0);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_height
+    CHECK (height > 1.5);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_weight
+    CHECK (weight > 60);
+
+ALTER TABLE Players 
+ADD CONSTRAINT CH_Players_salary
+    CHECK (salary > 0);
+
+
+CREATE TABLE Contracts(
+    contract_id SERIAL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+	player_id INT NOT NULL
+);
+
+ALTER TABLE Contracts 
+ADD CONSTRAINT PK_Contracts
+    PRIMARY KEY (contract_id);
+
+ALTER TABLE Contracts 
+ADD CONSTRAINT CH_Contracts_end_date
+    CHECK (end_date > start_date);
+
+CREATE TABLE Positions(
+    position_id SERIAL,
+    position_name TEXT NOT NULL
+);
+
+ALTER TABLE Positions 
+ADD CONSTRAINT PK_Positions
+    PRIMARY KEY (position_id);
+
+ALTER TABLE Positions 
+ADD CONSTRAINT U_Positions_position_name
+    UNIQUE (position_name);
+
+CREATE TABLE Nationalities(
+    nationality_id SERIAL,
+    nationality_name TEXT NOT NULL
+);
+
+ALTER TABLE Nationalities 
+ADD CONSTRAINT PK_Nationalities
+    PRIMARY KEY (nationality_id);
+
+ALTER TABLE Nationalities
+ADD CONSTRAINT U_Nationalities_nationality_name
+    UNIQUE (nationality_name);
+
+CREATE TABLE SponsorPayments(
+    payment INTEGER NOT NULL,
+	contract_id INT NOT NULL,
+	sponsor_id INT NOT NULL
+);
+
+ALTER TABLE SponsorPayments 
+ADD CONSTRAINT CH_SponsorPayments_payment
+    CHECK (payment > 0);
+
+CREATE TABLE Sponsors(
+    sponsor_id SERIAL,
+    sponsor_name TEXT NOT NULL
+);
+
+ALTER TABLE Sponsors 
+ADD CONSTRAINT PK_Sponsors
+    PRIMARY KEY (sponsor_id);
+
+ALTER TABLE Sponsors
+ADD CONSTRAINT U_Sponsors_sponsor_name
+    UNIQUE (sponsor_name);
+
+CREATE TABLE Results(
+    result_id SERIAL,
+    league_place INTEGER NOT NULL,
+    prize_fund INTEGER NOT NULL,
+    competition_date DATE NOT NULL,
+    year_payment INTEGER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+	competition_id INT NOT NULL,
+	sponsor_id INT NOT NULL
+);
+
+ALTER TABLE Results
+ADD CONSTRAINT PK_Results
+    PRIMARY KEY (result_id);
+
+ALTER TABLE Results
+ADD CONSTRAINT CH_Results_league_place
+    CHECK (league_place > 0);
+
+ALTER TABLE Results
+ADD CONSTRAINT CH_Results_prize_found
+    CHECK (prize_fund > 0);
+
+ALTER TABLE Results
+ADD CONSTRAINT CH_Results_year_payment
+    CHECK (year_payment > 0);
+
+ALTER TABLE Results 
+ADD CONSTRAINT CH_Results_end_date
+    CHECK (end_date > start_date);
+
+CREATE TABLE Competitions(
+    competition_id SERIAL,
+    competition_name TEXT NOT NULL
+);
+
+ALTER TABLE Competitions
+ADD CONSTRAINT PK_Competitions
+    PRIMARY KEY (competition_id);
+
+ALTER TABLE Competitions
+ADD CONSTRAINT U_Competitions_competition_name
+    UNIQUE (competition_name);
+
+CREATE TABLE Opponents(
+    opponent_id SERIAL,
+    opponent_name TEXT NOT NULL
+);
+
+ALTER TABLE Opponents
+ADD CONSTRAINT PK_Opponents
+    PRIMARY KEY (opponent_id);
+
+ALTER TABLE Opponents
+ADD CONSTRAINT U_Opponents_opponent_name
+    UNIQUE (opponent_name);
+
+CREATE TABLE Matches(
+    match_id SERIAL,
+    scored_goals INTEGER NOT NULL DEFAULT 0,
+    passed_goals INTEGER NOT NULL DEFAULT 0,
+    sold_tickets INTEGER NOT NULL,
+    tactic TEXT NOT NULL,
+    scheme TEXT NOT NULL,
+    match_date DATE NOT NULL,
+	competition_id INT NOT NULL,
+	opponent_id INT NOT NULL,
+	coaching_staff_id INT NOT NULL
+);
+
+ALTER TABLE Matches
+ADD CONSTRAINT PK_Matches
+    PRIMARY KEY (match_id);
+
+ALTER TABLE Matches
+ADD CONSTRAINT CH_Matches_scored_goals
+    CHECK (scored_goals > -1);
+
+ALTER TABLE Matches
+ADD CONSTRAINT CH_Matches_passed_goals
+    CHECK (passed_goals > -1);
+
+ALTER TABLE Matches
+ADD CONSTRAINT CH_Matches_sold_tickets
+    CHECK (sold_tickets > -1);
+
+CREATE TABLE Administration(
+    head_id SERIAL,
+    "name" TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    patronymic TEXT,
+    date_of_birth DATE NOT NULL,
+    passport_series INTEGER NOT NULL,
+    passport_number INTEGER NOT NULL,
+    division_number INTEGER NOT NULL,
+    date_of_issue DATE NOT NULL,
+    issued_by_whom TEXT NOT NULL,
+    phone_number TEXT NOT NULL
+);
+
+ALTER TABLE Administration
+ADD CONSTRAINT PK_Administration
+    PRIMARY KEY (head_id);
+
+ALTER TABLE Administration
+ADD CONSTRAINT CH_Administration_passport_number 
+    CHECK (passport_number > 0);
+
+ALTER TABLE Administration
+ADD CONSTRAINT CH_Administration_passport_series 
+    CHECK (passport_series > 1850);
+
+ALTER TABLE Administration
+ADD CONSTRAINT CH_Administration_division_number
+    CHECK (division_number > 0);
+
+ALTER TABLE Administration
+ADD CONSTRAINT U_Administration_phone_number 
+    UNIQUE (phone_number);
+
+CREATE TABLE CoachingStaff(
+	coaching_staff_id INT NOT NULL,
+	trainer_id INT NOT NULL
+);
+
+CREATE TABLE Trainers(
+    trainer_id SERIAL,
+    "name" TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    patronymic TEXT,
+    date_of_birth DATE NOT NULL,
+    passport_series INTEGER NOT NULL,
+    passport_number INTEGER NOT NULL,
+    division_number INTEGER NOT NULL,
+    date_of_issue DATE NOT NULL,
+    issued_by_whom TEXT NOT NULL,
+    phone_number TEXT NOT NULL,
+    license INTEGER NOT NULL
+);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT PK_Trainers
+    PRIMARY KEY (trainer_id);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT CH_Trainers_passport_number 
+    CHECK (passport_number > 0);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT CH_Trainers_passport_series 
+    CHECK (passport_series > 1850);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT CH_Trainers_division_number
+    CHECK (division_number > 0);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT U_Trainers_phone_number 
+    UNIQUE (phone_number);
+
+ALTER TABLE Trainers
+ADD CONSTRAINT U_Trainers_license 
+    UNIQUE (license);
+
+CREATE TABLE TrainerContracts(
+    contract_id SERIAL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+	trainer_id INT NOT NULL,
+	payment INT
+);
+
+ALTER TABLE TrainerContracts 
+ADD CONSTRAINT PK_TrainerContracts
+    PRIMARY KEY (contract_id);
+
+ALTER TABLE TrainerContracts
+ADD CONSTRAINT CH_TrainerContracts_end_date
+    CHECK (end_date > start_date);
+
+CREATE TABLE ApprovalOfCoachingStaff(
+    coaching_staff_id SERIAL,
+    approval_date DATE NOT NULL,
+	head_id INT NOT NULL
+);
+
+ALTER TABLE ApprovalOfCoachingStaff
+ADD CONSTRAINT PK_ApprovalOfCoachingStaff
+    PRIMARY KEY (coaching_staff_id);
+
+/*=================================================*/
+
+ALTER TABLE Players
+ADD CONSTRAINT FK_Players_nationality
+    FOREIGN KEY (nationality_id) REFERENCES Nationalities(nationality_id);
+
+ALTER TABLE Players
+ADD CONSTRAINT FK_Players_position
+    FOREIGN KEY (position_id) REFERENCES Positions(position_id);
+
+ALTER TABLE Contracts
+ADD CONSTRAINT FK_Contracts_player
+    FOREIGN KEY (player_id) REFERENCES Players(player_id);
+
+ALTER TABLE SponsorPayments
+ADD CONSTRAINT FK_SponsorPayments_sponsor
+    FOREIGN KEY (sponsor_id) REFERENCES Sponsors(sponsor_id);
+
+ALTER TABLE SponsorPayments
+ADD CONSTRAINT FK_SponsorPayments_contract
+    FOREIGN KEY (contract_id) REFERENCES Contracts(contract_id);
+
+ALTER TABLE Results
+ADD CONSTRAINT FK_Results_competition
+    FOREIGN KEY (competition_id) REFERENCES Competitions(competition_id);
+
+ALTER TABLE Results
+ADD CONSTRAINT FK_Results_sponsor
+    FOREIGN KEY (sponsor_id) REFERENCES Sponsors(sponsor_id);
+
+ALTER TABLE Matches
+ADD CONSTRAINT FK_Matches_competition
+    FOREIGN KEY (competition_id) REFERENCES Competitions(competition_id);
+
+ALTER TABLE Matches
+ADD CONSTRAINT FK_Matches_opponent
+    FOREIGN KEY (opponent_id) REFERENCES Opponents(opponent_id);
+
+ALTER TABLE Matches
+ADD CONSTRAINT FK_Matches_coaching_staff
+    FOREIGN KEY (coaching_staff_id) REFERENCES ApprovalOfCoachingStaff(coaching_staff_id);
+
+ALTER TABLE ApprovalOfCoachingStaff
+ADD CONSTRAINT FK_ApprovalOfCoachingStaff_head
+    FOREIGN KEY (head_id) REFERENCES Administration(head_id);
+
+ALTER TABLE CoachingStaff
+ADD CONSTRAINT FK_CoachingStaff
+    FOREIGN KEY (coaching_staff_id) REFERENCES ApprovalOfCoachingStaff(coaching_staff_id);
+
+ALTER TABLE CoachingStaff
+ADD CONSTRAINT FK_CoachingStaff_trainer
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id);
+
+ALTER TABLE TrainerContracts
+ADD CONSTRAINT FK_TrainerContracts_trainer
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id);
